@@ -4,13 +4,37 @@ const PumpState = require("./models/PumpState");
 const PumpLead = require("./models/PumpLead");
 const LagPump1 = require("./models/LagPump1");
 const LagPump2 = require("./models/LagPump2");
-
-
+const Station = require("./models/Station");
+const SetPoint = require("./models/SetPoint");
 
 const server = http.createServer();
 
+// const io = require("socket.io")(server, {
+//   cors: { origin: "*" },
+// });
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://your-production-url.com",
+]; // Agrega aquí todos los orígenes permitidos
+
 const io = require("socket.io")(server, {
-  cors: { origin: "*" },
+  // cors: {
+  //   origin: (origin, callback) => {
+  //     if (!origin || allowedOrigins.includes(origin)) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error("Not allowed by CORS"));
+  //     }
+  //   },
+  //   methods: ["GET", "POST"],
+  //   credentials: true,
+  // },
+  cors: {
+    origin: true, // Permite cualquier origen
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
 io.on("connection", (socket) => {
@@ -23,7 +47,7 @@ io.on("connection", (socket) => {
     try {
       let message;
       switch (eventName) {
-        case "pumpState":
+        case "pumpPm":
           message = await PumpState.create({
             plcId: data.plcId,
             pumpState: data.pumpState,
@@ -37,23 +61,30 @@ io.on("connection", (socket) => {
             // Otros campos específicos para event2
           });
           break;
-        case "pumpLag1":
+        case "pumpNext":
           message = await LagPump1.create({
             plcId: data.plcId,
             pumpLag1: data.pumpLag1,
             // Otros campos específicos para event3
           });
           break;
-        case "pumpLag2":
+        case "sensorConf":
           message = await LagPump2.create({
             plcId: data.plcId,
-            pumpLag2: data.pumpLag2,
+            sensorConf: data.sensorConf,
             // Otros campos específicos para event4
           });
           break;
-        case "event5":
-          message = await Message5.create({
+        case "station":
+          message = await Station.create({
             plcId: data.plcId,
+            station: data.station,
+            // Otros campos específicos para event5
+          });
+        case "setPoint":
+          message = await SetPoint.create({
+            plcId: data.plcId,
+            setPoint: data.setPoint,
             // Otros campos específicos para event5
           });
           break;
@@ -73,7 +104,14 @@ io.on("connection", (socket) => {
   };
 
   // Definir los eventos y sus handlers
-  const events = ["pumpState", "pumpLead", "pumpLag1", "pumpLag2", "event5"];
+  const events = [
+    "pumpPm",
+    "pumpLead",
+    "pumpNext",
+    "sensorConf",
+    "station",
+    "setPoint",
+  ];
 
   events.forEach((eventName) => {
     socket.on(eventName, (data) => handleEvent(eventName, data));

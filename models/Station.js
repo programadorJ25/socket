@@ -1,16 +1,16 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const PumpLead = sequelize.define("sensorConf", {
+const Station = sequelize.define("Station", {
   plcID: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true, // Asegúrate de que identifier sea único si es necesario
   },
-  sensorConf: {
+  station: {
     type: DataTypes.JSON,
     allowNull: false,
   },
 });
 
-module.exports = PumpLead;
+module.exports = Station;
