@@ -78,7 +78,7 @@ io.on("connection", (socket) => {
         case "station":
           message = await Station.create({
             plcId: data.plcId,
-            station: data.station,
+            station: data.values,
             // Otros campos específicos para event5
           });
         case "setPoint":
