@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const Station = sequelize.define("Station", {
+const Station = sequelize.define("station", {
   plcId: {
     type: DataTypes.STRING,
     allowNull: false,

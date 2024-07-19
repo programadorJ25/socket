@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const PumpLead = sequelize.define("Pump_state", {
+const PumpLead = sequelize.define("pump_state", {
   plcID: {
     type: DataTypes.STRING,
     allowNull: false,

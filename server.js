@@ -2,7 +2,7 @@ const http = require("http");
 const sequelize = require("./db/database");
 const PumpState = require("./models/PumpState");
 const PumpLead = require("./models/PumpLead");
-const LagPump1 = require("./models/LagPump1");
+const MappingDi = require("./models/MappingDi");
 const LagPump2 = require("./models/LagPump2");
 const Station = require("./models/Station");
 const SetPoint = require("./models/SetPoint");
@@ -47,10 +47,16 @@ io.on("connection", (socket) => {
     try {
       let message;
       switch (eventName) {
+        case "station":
+          message = await Station.create({
+            plcId: data.plcId,
+            station: data.values,
+            // Otros campos específicos para event5
+          });
         case "pumpPm":
           message = await PumpState.create({
             plcId: data.plcId,
-            pumpState: data.pumpState,
+            pumpPm: data.pumpPm,
             // Otros campos específicos para event1
           });
           break;
@@ -61,13 +67,6 @@ io.on("connection", (socket) => {
             // Otros campos específicos para event2
           });
           break;
-        case "pumpNext":
-          message = await LagPump1.create({
-            plcId: data.plcId,
-            pumpLag1: data.pumpLag1,
-            // Otros campos específicos para event3
-          });
-          break;
         case "sensorConf":
           message = await LagPump2.create({
             plcId: data.plcId,
@@ -75,17 +74,18 @@ io.on("connection", (socket) => {
             // Otros campos específicos para event4
           });
           break;
-        case "station":
-          message = await Station.create({
-            plcId: data.plcId,
-            station: data.values,
-            // Otros campos específicos para event5
-          });
         case "setPoint":
           message = await SetPoint.create({
             plcId: data.plcId,
             setPoint: data.setPoint,
             // Otros campos específicos para event5
+          });
+          break;
+        case "mappingDi":
+          message = await MappingDi.create({
+            plcId: data.plcId,
+            mappingDi: data.mappingDi,
+            // Otros campos específicos para event3
           });
           break;
         default:
@@ -105,12 +105,12 @@ io.on("connection", (socket) => {
 
   // Definir los eventos y sus handlers
   const events = [
+    "station",
     "pumpPm",
     "pumpLead",
-    "pumpNext",
     "sensorConf",
-    "station",
     "setPoint",
+    "mappingDi",
   ];
 
   events.forEach((eventName) => {

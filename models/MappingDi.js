@@ -1,16 +1,16 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const PumpLead = sequelize.define("Lag_pump1", {
+const MappingDi = sequelize.define("mappingDi", {
   plcID: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // Asegúrate de que identifier sea único si es necesario
+    unique: false, // Asegúrate de que identifier sea único si es necesario
   },
-  pumpLag1: {
+  mappingDi: {
     type: DataTypes.JSON,
     allowNull: false,
   },
 });
 
-module.exports = PumpLead;
+module.exports = MappingDi;
