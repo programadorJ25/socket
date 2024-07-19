@@ -56,35 +56,35 @@ io.on("connection", (socket) => {
         case "pumpPm":
           message = await PumpState.create({
             plcId: data.plcId,
-            pumpPm: data.pumpPm,
+            pumpPm: data.values,
             // Otros campos específicos para event1
           });
           break;
         case "pumpLead":
           message = await PumpLead.create({
             plcId: data.plcId,
-            pumpLead: data.pumpLead,
+            pumpLead: data.values,
             // Otros campos específicos para event2
           });
           break;
         case "sensorConf":
           message = await LagPump2.create({
             plcId: data.plcId,
-            sensorConf: data.sensorConf,
+            sensorConf: data.values,
             // Otros campos específicos para event4
           });
           break;
         case "setPoint":
           message = await SetPoint.create({
             plcId: data.plcId,
-            setPoint: data.setPoint,
+            setPoint: data.values,
             // Otros campos específicos para event5
           });
           break;
         case "mappingDi":
           message = await MappingDi.create({
             plcId: data.plcId,
-            mappingDi: data.mappingDi,
+            mappingDi: data.values,
             // Otros campos específicos para event3
           });
           break;
