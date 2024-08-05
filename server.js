@@ -115,8 +115,8 @@ io.on("connection", (socket) => {
     "pumpLead",
     "sensorConf",
     "setPoint",
-    "dataEnergy",
     "mappingDi",
+    "dataEnergy",
   ];
 
   events.forEach((eventName) => {
