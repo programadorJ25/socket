@@ -83,15 +83,15 @@ io.on("connection", (socket) => {
             // Otros campos específicos para setPoint
           });
           break;
+        case "mappingDi":
+          message = await upsertMappingDi(data.plcId, data.values);
+          break;
         case "dataEnergy":
           message = await DataEnergy.create({
             plcId: data.plcId,
             dataEnergy: data.values,
             // Otros campos específicos para dataEnergy
           });
-          break;
-        case "mappingDi":
-          message = await upsertMappingDi(data.plcId, data.values);
           break;
         default:
           console.error("Evento desconocido:", eventName);
