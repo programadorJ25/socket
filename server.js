@@ -2,10 +2,11 @@ const http = require("http");
 const sequelize = require("./db/database");
 const PumpState = require("./models/PumpState");
 const PumpLead = require("./models/PumpLead");
-const MappingDi = require("./models/MappingDi");
+const upsertMappingDi = require("./models/MappingDiService");
 const LagPump2 = require("./models/LagPump2");
 const Station = require("./models/Station");
 const SetPoint = require("./models/SetPoint");
+const DataEnergy = require("./models/DataEnergy");
 
 const server = http.createServer();
 
@@ -51,42 +52,46 @@ io.on("connection", (socket) => {
           message = await Station.create({
             plcId: data.plcId,
             station: data.values,
-            // Otros campos específicos para event5
+            // Otros campos específicos para station
           });
+          break;
         case "pumpPm":
           message = await PumpState.create({
             plcId: data.plcId,
             pumpPm: data.values,
-            // Otros campos específicos para event1
+            // Otros campos específicos para pumpPm
           });
           break;
         case "pumpLead":
           message = await PumpLead.create({
             plcId: data.plcId,
             pumpLead: data.values,
-            // Otros campos específicos para event2
+            // Otros campos específicos para pumpLead
           });
           break;
         case "sensorConf":
           message = await LagPump2.create({
             plcId: data.plcId,
             sensorConf: data.values,
-            // Otros campos específicos para event4
+            // Otros campos específicos para sensorConf
           });
           break;
         case "setPoint":
           message = await SetPoint.create({
             plcId: data.plcId,
             setPoint: data.values,
-            // Otros campos específicos para event5
+            // Otros campos específicos para setPoint
+          });
+          break;
+        case "dataEnergy":
+          message = await DataEnergy.create({
+            plcId: data.plcId,
+            dataEnergy: data.values,
+            // Otros campos específicos para dataEnergy
           });
           break;
         case "mappingDi":
-          message = await MappingDi.create({
-            plcId: data.plcId,
-            mappingDi: data.values,
-            // Otros campos específicos para event3
-          });
+          message = await upsertMappingDi(data.plcId, data.values);
           break;
         default:
           console.error("Evento desconocido:", eventName);
@@ -110,6 +115,7 @@ io.on("connection", (socket) => {
     "pumpLead",
     "sensorConf",
     "setPoint",
+    "dataEnergy",
     "mappingDi",
   ];
 
