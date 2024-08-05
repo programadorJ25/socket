@@ -6,7 +6,7 @@ const Station = sequelize.define("energy", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  info: {
+  dataEnergy: {
     type: DataTypes.JSON,
     allowNull: false,
   },
