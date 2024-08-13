@@ -1,17 +1,16 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const MappingDi = sequelize.define("mappingDi", {
+const MappingDo = sequelize.define("mappingDo", {
   plcId: {
     type: DataTypes.STRING,
     allowNull: true,
-    unique: true, // Asegúrate de que identifier sea único si es necesario
+    unique: false, // Asegúrate de que identifier sea único si es necesario
   },
-  mappingDi: {
+  mappingDo: {
     type: DataTypes.JSON,
     allowNull: true,
   },
-  
 });
 
-module.exports = MappingDi;
+module.exports = MappingDo;

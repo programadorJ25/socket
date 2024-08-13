@@ -3,21 +3,40 @@ const _ = require("lodash");
 
 async function upsertMappingDi(plcId, newMappingDi) {
   try {
-    // Busca todos los registros existentes por plcId
-    const existingRecords = await MappingDi.findAll({ where: { plcId } });
+    // Busca el registro más reciente por plcId en orden descendente de createdAt
+    const existingRecord = await MappingDi.findOne({
+      where: { plcId },
+      order: [["createdAt", "DESC"]],
+    });
 
-    console.log(existingRecords);
+    // Verifica si existe algún registro
+    if (existingRecord) {
+      // Convierte existingRecord.mappingDi a JSON
+      let existingMappingDi;
+      try {
+        existingMappingDi = JSON.parse(existingRecord.mappingDi);
+      } catch (error) {
+        console.error("Error parsing existing mappingDi:", error);
+        return;
+      }
 
-    // Verifica si existe algún registro con los mismos datos en 'mappingDi'
-    const recordExists = existingRecords.some((record) =>
-      _.isEqual(record.mappingDi, newMappingDi)
-    );
+      console.log("Existing Record mappingDi:", existingMappingDi);
+      console.log("New mappingDi:", newMappingDi);
 
-    if (recordExists) {
-      // Los datos en 'mappingDi' son iguales a uno de los registros existentes, no se necesita ninguna acción
-      console.log("No changes detected. No update performed.");
+      // Verifica si los datos son iguales
+      const isEqual = _.isEqual(existingMappingDi, newMappingDi);
+      console.log("Comparison Result:", isEqual);
+
+      if (isEqual) {
+        // Los datos en 'mappingDi' son iguales a uno de los registros existentes, no se necesita ninguna acción
+        console.log("No changes detected. No update performed.");
+      } else {
+        // Los datos en 'mappingDi' son diferentes, crea uno nuevo
+        await MappingDi.create({ plcId, mappingDi: newMappingDi });
+        console.log("Record inserted successfully.");
+      }
     } else {
-      // Los datos en 'mappingDi' son diferentes a todos los registros existentes, crea uno nuevo
+      // No se encontró ningún registro existente, crea uno nuevo
       await MappingDi.create({ plcId, mappingDi: newMappingDi });
       console.log("Record inserted successfully.");
     }

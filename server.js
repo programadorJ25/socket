@@ -3,6 +3,7 @@ const sequelize = require("./db/database");
 const PumpState = require("./models/PumpState");
 const PumpLead = require("./models/PumpLead");
 const upsertMappingDi = require("./models/MappingDiService");
+const upsertMappingDo = require("./models/MappingDoService");
 const LagPump2 = require("./models/LagPump2");
 const Station = require("./models/Station");
 const SetPoint = require("./models/SetPoint");
@@ -84,7 +85,13 @@ io.on("connection", (socket) => {
           });
           break;
         case "mappingDi":
-          message = await upsertMappingDi(data.plcId, data.values);
+          console.log("mensaje: " + data.mappingDi);
+
+          message = await upsertMappingDi(data.plcId, data.mappingDi);
+          break;
+        case "mappingDo":
+          console.log("mensaje: " + data.mappingDo);
+          message = await upsertMappingDo(data.plcId, data.mappingDo);
           break;
         case "dataEnergy":
           message = await DataEnergy.create({
@@ -116,6 +123,7 @@ io.on("connection", (socket) => {
     "sensorConf",
     "setPoint",
     "mappingDi",
+    "mappingDo",
     "dataEnergy",
   ];
 
