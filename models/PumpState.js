@@ -5,7 +5,6 @@ const PumpLead = sequelize.define("pump_state", {
   plcId: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // Asegúrate de que identifier sea único si es necesario
   },
   pumpState: {
     type: DataTypes.JSON,

@@ -85,12 +85,11 @@ io.on("connection", (socket) => {
           });
           break;
         case "mappingDi":
-          console.log("mensaje: " + data.mappingDi);
-
+          // console.log("mensaje: " + data.mappingDi);
           message = await upsertMappingDi(data.plcId, data.mappingDi);
           break;
         case "mappingDo":
-          console.log("mensaje: " + data.mappingDo);
+          // console.log("mensaje: " + data.mappingDo);
           message = await upsertMappingDo(data.plcId, data.mappingDo);
           break;
         case "dataEnergy":
@@ -133,7 +132,7 @@ io.on("connection", (socket) => {
 });
 
 sequelize
-  .sync()
+  .sync({ alter: true })  // Ajusta las tablas existentes para que coincidan con el modelo
   .then(() => {
     server.listen(8080, () => {
       console.log("Servidor escuchando en el puerto 8080");
@@ -142,3 +141,4 @@ sequelize
   .catch((error) => {
     console.error("Error al sincronizar con la base de datos:", error);
   });
+
