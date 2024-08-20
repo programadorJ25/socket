@@ -1,7 +1,7 @@
 const MappingDi = require("./MappingDi");
 const _ = require("lodash");
 
-async function upsertMappingDi(plcId, newMappingDi) {
+async function upsertMappingDi(plcId, newMappingDi, state) {
   try {
     // Busca el registro más reciente por plcId en orden descendente de createdAt
     const existingRecord = await MappingDi.findOne({
@@ -32,12 +32,12 @@ async function upsertMappingDi(plcId, newMappingDi) {
         console.log("No changes detected. No update performed.");
       } else {
         // Los datos en 'mappingDi' son diferentes, crea uno nuevo
-        await MappingDi.create({ plcId, mappingDi: newMappingDi });
+        await MappingDi.create({ plcId, mappingDi: newMappingDi, state });
         console.log("Record inserted successfully.");
       }
     } else {
       // No se encontró ningún registro existente, crea uno nuevo
-      await MappingDi.create({ plcId, mappingDi: newMappingDi });
+      await MappingDi.create({ plcId, mappingDi: newMappingDi, state });
       console.log("Record inserted successfully.");
     }
   } catch (error) {

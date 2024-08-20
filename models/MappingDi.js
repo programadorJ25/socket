@@ -10,7 +10,10 @@ const MappingDi = sequelize.define("mappingDi", {
     type: DataTypes.JSON,
     allowNull: true,
   },
-  
+  state: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 
 module.exports = MappingDi;

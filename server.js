@@ -1,14 +1,6 @@
 const http = require("http");
 const sequelize = require("./db/database");
-const PumpState = require("./models/PumpState");
-const PumpLead = require("./models/PumpLead");
-const upsertMappingDi = require("./models/MappingDiService");
-const upsertMappingDo = require("./models/MappingDoService");
-const LagPump2 = require("./models/LagPump2");
-const Station = require("./models/Station");
-const SetPoint = require("./models/SetPoint");
-const DataEnergy = require("./models/DataEnergy");
-
+const EventHandler = require("./middleware/EventHandler");
 const server = http.createServer();
 
 // const io = require("socket.io")(server, {
@@ -42,103 +34,56 @@ const io = require("socket.io")(server, {
 io.on("connection", (socket) => {
   console.log("Se ha conectado un cliente");
 
-  // Función para manejar el almacenamiento del mensaje
   const handleEvent = async (eventName, data) => {
     console.log(`${eventName} recibido:`, data);
 
     try {
-      let message;
-      switch (eventName) {
-        case "station":
-          message = await Station.create({
-            plcId: data.plcId,
-            station: data.values,
-            // Otros campos específicos para station
-          });
-          break;
-        case "pumpPm":
-          message = await PumpState.create({
-            plcId: data.plcId,
-            pumpPm: data.values,
-            // Otros campos específicos para pumpPm
-          });
-          break;
-        case "pumpLead":
-          message = await PumpLead.create({
-            plcId: data.plcId,
-            pumpLead: data.values,
-            // Otros campos específicos para pumpLead
-          });
-          break;
-        case "sensorConf":
-          message = await LagPump2.create({
-            plcId: data.plcId,
-            sensorConf: data.values,
-            // Otros campos específicos para sensorConf
-          });
-          break;
-        case "setPoint":
-          message = await SetPoint.create({
-            plcId: data.plcId,
-            setPoint: data.values,
-            // Otros campos específicos para setPoint
-          });
-          break;
-        case "mappingDi":
-          // console.log("mensaje: " + data.mappingDi);
-          message = await upsertMappingDi(data.plcId, data.mappingDi);
-          break;
-        case "mappingDo":
-          // console.log("mensaje: " + data.mappingDo);
-          message = await upsertMappingDo(data.plcId, data.mappingDo);
-          break;
-        case "dataEnergy":
-          message = await DataEnergy.create({
-            plcId: data.plcId,
-            dataEnergy: data.values,
-            // Otros campos específicos para dataEnergy
-          });
-          break;
-        default:
-          console.error("Evento desconocido:", eventName);
-          return;
+      // Busca y ejecuta el comando correspondiente
+      const handlerMethod = commandMap[eventName];
+      if (handlerMethod) {
+        const message = await handlerMethod(data);
+        console.log(
+          `Mensaje para ${eventName} almacenado en la base de datos:`,
+          message
+        );
+        io.emit(eventName, data);
+      } else {
+        console.error("Evento desconocido:", eventName);
       }
-      console.log(
-        `Mensaje para ${eventName} almacenado en la base de datos:`,
-        message
-      );
     } catch (error) {
       console.error(`Error al almacenar el mensaje para ${eventName}:`, error);
     }
-
-    io.emit(eventName, data);
   };
 
-  // Definir los eventos y sus handlers
-  const events = [
-    "station",
-    "pumpPm",
-    "pumpLead",
-    "sensorConf",
-    "setPoint",
-    "mappingDi",
-    "mappingDo",
-    "dataEnergy",
-  ];
+  // Mapeo de eventos a métodos del manejador de comandos
+  const commandMap = {
+    station: EventHandler.handleStation,
+    pumpPm: EventHandler.handlePumpPm,
+    pumpLead: EventHandler.handlePumpLead,
+    sensorConf: EventHandler.handleSensorConf,
+    setPoint: EventHandler.handleSetPoint,
+    mappingDi: EventHandler.handleMappingDi,
+    mappingDo: EventHandler.handleMappingDo,
+    dataEnergy: EventHandler.handleDataEnergy,
+    // Añadir nuevos eventos aquí
+  };
 
-  events.forEach((eventName) => {
+  // Registrar eventos
+  Object.keys(commandMap).forEach((eventName) => {
     socket.on(eventName, (data) => handleEvent(eventName, data));
   });
 });
 
 sequelize
-  .sync({ alter: true })  // Ajusta las tablas existentes para que coincidan con el modelo
+  .sync()
   .then(() => {
-    server.listen(8080, () => {
-      console.log("Servidor escuchando en el puerto 8080");
-    });
+    console.log("Base de datos sincronizada");
   })
   .catch((error) => {
     console.error("Error al sincronizar con la base de datos:", error);
+  })
+  .finally(() => {
+    server.listen(8080, () => {
+      console.log("Servidor escuchando en el puerto 8080");
+    });
   });
-
