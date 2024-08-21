@@ -1,11 +1,9 @@
 const http = require("http");
 const sequelize = require("./db/database");
-const EventHandler = require("./middleware/EventHandler");
+const { EventHandler } = require('./middleware/EventHandler');
+const eventHandler = new EventHandler();
 const server = http.createServer();
 
-// const io = require("socket.io")(server, {
-//   cors: { origin: "*" },
-// });
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -13,23 +11,13 @@ const allowedOrigins = [
 ]; // Agrega aquí todos los orígenes permitidos
 
 const io = require("socket.io")(server, {
-  // cors: {
-  //   origin: (origin, callback) => {
-  //     if (!origin || allowedOrigins.includes(origin)) {
-  //       callback(null, true);
-  //     } else {
-  //       callback(new Error("Not allowed by CORS"));
-  //     }
-  //   },
-  //   methods: ["GET", "POST"],
-  //   credentials: true,
-  // },
   cors: {
     origin: true, // Permite cualquier origen
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
+
 
 io.on("connection", (socket) => {
   console.log("Se ha conectado un cliente");
@@ -38,7 +26,7 @@ io.on("connection", (socket) => {
     console.log(`${eventName} recibido:`, data);
 
     try {
-      // Busca y ejecuta el comando correspondiente
+      // Busca y ejecuta el comando correspondiente en la instancia
       const handlerMethod = commandMap[eventName];
       if (handlerMethod) {
         const message = await handlerMethod(data);
@@ -57,14 +45,14 @@ io.on("connection", (socket) => {
 
   // Mapeo de eventos a métodos del manejador de comandos
   const commandMap = {
-    station: EventHandler.handleStation,
-    pumpPm: EventHandler.handlePumpPm,
-    pumpLead: EventHandler.handlePumpLead,
-    sensorConf: EventHandler.handleSensorConf,
-    setPoint: EventHandler.handleSetPoint,
-    mappingDi: EventHandler.handleMappingDi,
-    mappingDo: EventHandler.handleMappingDo,
-    dataEnergy: EventHandler.handleDataEnergy,
+    station: eventHandler.handleStation, // Usar la instancia
+    pumpPm: eventHandler.handlePumpPm, // Usar la instancia
+    pumpLead: eventHandler.handlePumpLead,
+    sensorConf: eventHandler.handleSensorConf,
+    setPoint: eventHandler.handleSetPoint,
+    mappingDi: eventHandler.handleMappingDi,
+    mappingDo: eventHandler.handleMappingDo,
+    dataEnergy: eventHandler.handleDataEnergy,
     // Añadir nuevos eventos aquí
   };
 
@@ -73,6 +61,15 @@ io.on("connection", (socket) => {
     socket.on(eventName, (data) => handleEvent(eventName, data));
   });
 });
+
+// Inicia un intervalo para hacer batch insert cada 10 segundos (ajusta según necesites)
+setInterval(async () => {
+  try {
+    await eventHandler.batchInsertData(); // Usar la instancia
+  } catch (error) {
+    console.error("Error durante el batch insert:", error);
+  }
+}, 10000); // 10 segundos
 
 sequelize
   .sync()

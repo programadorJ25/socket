@@ -11,8 +11,8 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
     pool: {
-      max: 5, // Número máximo de conexiones en el pool
-      min: 0, // Número mínimo de conexiones en el pool
+      max: 3, // Reduce el número máximo de conexiones en el pool
+      min: 1, // Mantén al menos una conexión en el pool
       acquire: 30000, // Tiempo máximo en ms que Sequelize intentará obtener una conexión antes de lanzar un error
       idle: 10000, // Tiempo máximo en ms que una conexión puede estar inactiva antes de ser liberada
     },

@@ -1,12 +1,13 @@
 const MappingDo = require("./MappingDo");
 const _ = require("lodash");
 
-async function upsertMappingDo(plcId, newMappingDo, state) {
+async function upsertMappingDo(plcId, newMappingDo, state, transaction = null) {
   try {
     // Busca el registro más reciente por plcId en orden descendente de createdAt
     const existingRecord = await MappingDo.findOne({
       where: { plcId },
       order: [["createdAt", "DESC"]],
+      transaction,
     });
 
     // Verifica si existe algún registro
@@ -31,13 +32,19 @@ async function upsertMappingDo(plcId, newMappingDo, state) {
         // Los datos en 'mappingDo' son iguales a uno de los registros existentes, no se necesita ninguna acción
         console.log("No changes detected. No update performed.");
       } else {
-        // Los datos en 'mappingDo' son Doferentes, crea uno nuevo
-        await MappingDo.create({ plcId, mappingDo: newMappingDo, state });
+        // Los datos en 'mappingDo' son diferentes, crea uno nuevo
+        await MappingDo.create(
+          { plcId, mappingDo: newMappingDo, state },
+          { transaction }
+        );
         console.log("Record inserted successfully.");
       }
     } else {
       // No se encontró ningún registro existente, crea uno nuevo
-      await MappingDo.create({ plcId, mappingDo: newMappingDo, state });
+      await MappingDo.create(
+        { plcId, mappingDo: newMappingDo, state },
+        { transaction }
+      );
       console.log("Record inserted successfully.");
     }
   } catch (error) {
