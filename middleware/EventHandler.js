@@ -40,11 +40,11 @@ class EventHandler {
           transaction,
         });
       }
-      if (this.accumulatedData.pumpStates.length > 0) {
-        await PumpState.bulkCreate(this.accumulatedData.pumpStates, {
-          transaction,
-        });
-      }
+      // if (this.accumulatedData.pumpStates.length > 0) {
+      //   await PumpState.bulkCreate(this.accumulatedData.pumpStates, {
+      //     transaction,
+      //   });
+      // }
       if (this.accumulatedData.pumpLeads.length > 0) {
         await PumpLead.bulkCreate(this.accumulatedData.pumpLeads, {
           transaction,
@@ -121,7 +121,6 @@ class EventHandler {
     this.accumulatedData.pumpStates.push({
       plcId: data.plcId,
       pumpPm: data.values,
-      state: data.state,
     });
   }
 
@@ -158,7 +157,6 @@ class EventHandler {
   }
 
   async handleMappingDo(data) {
-    console.log("this in handleMappingDo:", this);
     this.accumulatedData.mappingDos.push({
       plcId: data.plcId,
       values: data.values,

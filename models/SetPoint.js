@@ -10,6 +10,10 @@ const SetPoint = sequelize.define("set_Point", {
     type: DataTypes.JSON,
     allowNull: false,
   },
+  state: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 
 module.exports = SetPoint;

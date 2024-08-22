@@ -46,7 +46,7 @@ io.on("connection", (socket) => {
   // Mapeo de eventos a métodos del manejador de comandos
   const commandMap = {
     station: eventHandler.handleStation, // Usar la instancia
-    pumpPm: eventHandler.handlePumpPm, // Usar la instancia
+    // pumpPm: eventHandler.handlePumpPm, // Usar la instancia
     pumpLead: eventHandler.handlePumpLead,
     sensorConf: eventHandler.handleSensorConf,
     setPoint: eventHandler.handleSetPoint,
