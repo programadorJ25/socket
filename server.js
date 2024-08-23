@@ -48,7 +48,6 @@ io.on("connection", (socket) => {
     mappingDi: eventHandler.handleMappingDi,
     mappingDo: eventHandler.handleMappingDo,
     dataEnergy: eventHandler.handleDataEnergy,
-    dataEnergy: eventHandler.handleDataEnergy,
     analogInScale: eventHandler.handleAnalogInputScale,
     lowDischarge: eventHandler.handleLowDischarge,
     highDischarge: eventHandler.handleHighDischarge,

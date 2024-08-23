@@ -4,6 +4,7 @@ const PumpLead = require("../models/PumpLead");
 const upsertSetPoint = require("../models/SetPointService");
 const upsertMappingDi = require("../models/MappingDiService");
 const upsertMappingDo = require("../models/MappingDoService");
+const upsertDataEnergy = require("../models/DataEnergyService");
 const upsertAnalogIScale = require("../models/AnlogInSService");
 const upsertLowDischarge = require("../models/LowPressureService");
 const upsertHighDischarge = require("../models/HighPressureService");
@@ -17,9 +18,7 @@ const upsertVsdPumpPM = require("../models/VsdPumpPMService");
 const upsertVsdPump1 = require("../models/VsdPump1Service");
 const upsertVsdPump2 = require("../models/VsdPump2Service");
 
-const LagPump2 = require("../models/LagPump2");
 const Station = require("../models/Station");
-const DataEnergy = require("../models/DataEnergy");
 
 // handlers/EventHandler.js
 class EventHandler {
@@ -102,9 +101,14 @@ class EventHandler {
       }
 
       if (this.accumulatedData.dataEnergies.length > 0) {
-        await DataEnergy.bulkCreate(this.accumulatedData.dataEnergies, {
-          transaction,
-        });
+        for (const energy of this.accumulatedData.dataEnergies) {
+          await upsertDataEnergy(
+            energy.plcId,
+            energy.values,
+            energy.state,
+            transaction
+          );
+        }
       }
 
       if (this.accumulatedData.analogInputScale.length > 0) {
@@ -268,10 +272,11 @@ class EventHandler {
 
   // Métodos para acumular datos
   async handleStation(data) {
+    console.log(data);
+
     this.accumulatedData.stations.push({
       plcId: data.plcId,
-      values: data.values,
-      state: data.state,
+      station: data.values,
     });
   }
 
