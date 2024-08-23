@@ -1,9 +1,8 @@
 const http = require("http");
 const sequelize = require("./db/database");
-const { EventHandler } = require('./middleware/EventHandler');
+const { EventHandler } = require("./middleware/EventHandler");
 const eventHandler = new EventHandler();
 const server = http.createServer();
-
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -17,7 +16,6 @@ const io = require("socket.io")(server, {
     credentials: true,
   },
 });
-
 
 io.on("connection", (socket) => {
   console.log("Se ha conectado un cliente");
@@ -46,13 +44,23 @@ io.on("connection", (socket) => {
   // Mapeo de eventos a métodos del manejador de comandos
   const commandMap = {
     station: eventHandler.handleStation, // Usar la instancia
-    // pumpPm: eventHandler.handlePumpPm, // Usar la instancia
-    pumpLead: eventHandler.handlePumpLead,
-    sensorConf: eventHandler.handleSensorConf,
     setPoint: eventHandler.handleSetPoint,
     mappingDi: eventHandler.handleMappingDi,
     mappingDo: eventHandler.handleMappingDo,
     dataEnergy: eventHandler.handleDataEnergy,
+    dataEnergy: eventHandler.handleDataEnergy,
+    analogInScale: eventHandler.handleAnalogInputScale,
+    lowDischarge: eventHandler.handleLowDischarge,
+    highDischarge: eventHandler.handleHighDischarge,
+    lowLevel: eventHandler.handleLowLevel,
+    failurePhase: eventHandler.handleFailurePhase,
+    failureVFD: eventHandler.handleFailureVFD,
+    filterStation: eventHandler.handleFilterStation,
+    fertigation: eventHandler.handleFertigation,
+    lakeLevel: eventHandler.handleLakeLevel,
+    vsdPumpPM: eventHandler.handleVsdPumpPM,
+    vsdPump1: eventHandler.handleVsdPump1,
+    vsdPump2: eventHandler.handleVsdPump2,
     // Añadir nuevos eventos aquí
   };
 

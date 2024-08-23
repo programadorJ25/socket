@@ -1,11 +1,24 @@
 const sequelize = require("../db/database");
-const PumpState = require("../models/PumpState");
 const PumpLead = require("../models/PumpLead");
+
+const upsertSetPoint = require("../models/SetPointService");
 const upsertMappingDi = require("../models/MappingDiService");
 const upsertMappingDo = require("../models/MappingDoService");
+const upsertAnalogIScale = require("../models/AnlogInSService");
+const upsertLowDischarge = require("../models/LowPressureService");
+const upsertHighDischarge = require("../models/HighPressureService");
+const upsertLowLevel = require("../models/LowLevelService");
+const upsertFailurePhase = require("../models/PhaseFailureService");
+const upsertFailureVFD = require("../models/VFDfailureService");
+const upsertFilterStation = require("../models/FilterStationService");
+const upsertFertigation = require("../models/FertigationService");
+const upsertLakeLevel = require("../models/LakeLevelService");
+const upsertVsdPumpPM = require("../models/VsdPumpPMService");
+const upsertVsdPump1 = require("../models/VsdPump1Service");
+const upsertVsdPump2 = require("../models/VsdPump2Service");
+
 const LagPump2 = require("../models/LagPump2");
 const Station = require("../models/Station");
-const SetPoint = require("../models/SetPoint");
 const DataEnergy = require("../models/DataEnergy");
 
 // handlers/EventHandler.js
@@ -13,23 +26,40 @@ class EventHandler {
   constructor() {
     this.accumulatedData = {
       stations: [],
-      pumpStates: [],
-      pumpLeads: [],
-      sensorConfs: [],
       setPoints: [],
       mappingDis: [],
       mappingDos: [],
       dataEnergies: [],
+      analogInputScale: [],
+      lowDischarge: [],
+      highDischarge: [],
+      lowLevel: [],
+      failurePhase: [],
+      failureVFD: [],
+      filterStation: [],
+      fertigation: [],
+      lakeLevel: [],
+      vsdPumpPM: [],
+      vsdPump1: [],
+      vsdPump2: [],
     };
     this.handleStation = this.handleStation.bind(this);
-    this.handlePumpPm = this.handlePumpPm.bind(this);
-    this.handlePumpLead = this.handlePumpLead.bind(this);
-    this.handleSensorConf = this.handleSensorConf.bind(this);
     this.handleSetPoint = this.handleSetPoint.bind(this);
     this.handleMappingDi = this.handleMappingDi.bind(this);
     this.handleMappingDo = this.handleMappingDo.bind(this);
     this.handleDataEnergy = this.handleDataEnergy.bind(this);
-
+    this.handleAnalogInputScale = this.handleAnalogInputScale.bind(this);
+    this.handleLowDischarge = this.handleLowDischarge.bind(this);
+    this.handleHighDischarge = this.handleHighDischarge.bind(this);
+    this.handleLowLevel = this.handleLowLevel.bind(this);
+    this.handleFailurePhase = this.handleFailurePhase.bind(this);
+    this.handleFailureVFD = this.handleFailureVFD.bind(this);
+    this.handleFilterStation = this.handleFilterStation.bind(this);
+    this.handleFertigation = this.handleFertigation.bind(this);
+    this.handleLakeLevel = this.handleLakeLevel.bind(this);
+    this.handleVsdPumpPM = this.handleVsdPumpPM.bind(this);
+    this.handleVsdPump1 = this.handleVsdPump1.bind(this);
+    this.handleVsdPump2 = this.handleVsdPump2.bind(this);
     // Bindear otros métodos según sea necesario
   }
   async batchInsertData() {
@@ -40,25 +70,15 @@ class EventHandler {
           transaction,
         });
       }
-      // if (this.accumulatedData.pumpStates.length > 0) {
-      //   await PumpState.bulkCreate(this.accumulatedData.pumpStates, {
-      //     transaction,
-      //   });
-      // }
-      if (this.accumulatedData.pumpLeads.length > 0) {
-        await PumpLead.bulkCreate(this.accumulatedData.pumpLeads, {
-          transaction,
-        });
-      }
-      if (this.accumulatedData.sensorConfs.length > 0) {
-        await LagPump2.bulkCreate(this.accumulatedData.sensorConfs, {
-          transaction,
-        });
-      }
       if (this.accumulatedData.setPoints.length > 0) {
-        await SetPoint.bulkCreate(this.accumulatedData.setPoints, {
-          transaction,
-        });
+        for (const set_Point of this.accumulatedData.setPoints) {
+          await upsertSetPoint(
+            set_Point.plcId,
+            set_Point.values,
+            set_Point.state,
+            transaction
+          );
+        }
       }
       if (this.accumulatedData.mappingDis.length > 0) {
         for (const mappingDiData of this.accumulatedData.mappingDis) {
@@ -87,6 +107,135 @@ class EventHandler {
         });
       }
 
+      if (this.accumulatedData.analogInputScale.length > 0) {
+        for (const analogIScale of this.accumulatedData.analogInputScale) {
+          await upsertAnalogIScale(
+            analogIScale.plcId,
+            analogIScale.values,
+            analogIScale.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.lowDischarge.length > 0) {
+        for (const lowDis of this.accumulatedData.lowDischarge) {
+          await upsertLowDischarge(
+            lowDis.plcId,
+            lowDis.values,
+            lowDis.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.highDischarge.length > 0) {
+        for (const highDis of this.accumulatedData.highDischarge) {
+          await upsertHighDischarge(
+            highDis.plcId,
+            highDis.values,
+            highDis.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.lowLevel.length > 0) {
+        for (const levelLow of this.accumulatedData.lowLevel) {
+          await upsertLowLevel(
+            levelLow.plcId,
+            levelLow.values,
+            levelLow.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.failurePhase.length > 0) {
+        for (const failPhase of this.accumulatedData.failurePhase) {
+          await upsertFailurePhase(
+            failPhase.plcId,
+            failPhase.values,
+            failPhase.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.failureVFD.length > 0) {
+        for (const failVFD of this.accumulatedData.failureVFD) {
+          await upsertFailureVFD(
+            failVFD.plcId,
+            failVFD.values,
+            failVFD.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.filterStation.length > 0) {
+        for (const stationFilter of this.accumulatedData.filterStation) {
+          await upsertFilterStation(
+            stationFilter.plcId,
+            stationFilter.values,
+            stationFilter.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.fertigation.length > 0) {
+        for (const fertigations of this.accumulatedData.fertigation) {
+          await upsertFertigation(
+            fertigations.plcId,
+            fertigations.values,
+            fertigations.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.lakeLevel.length > 0) {
+        for (const levelLake of this.accumulatedData.lakeLevel) {
+          await upsertLakeLevel(
+            levelLake.plcId,
+            levelLake.values,
+            levelLake.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.vsdPumpPM.length > 0) {
+        for (const pmpPumpVSD of this.accumulatedData.vsdPumpPM) {
+          await upsertVsdPumpPM(
+            pmpPumpVSD.plcId,
+            pmpPumpVSD.values,
+            pmpPumpVSD.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.vsdPump1.length > 0) {
+        for (const pump1VSD1 of this.accumulatedData.vsdPump1) {
+          await upsertVsdPump1(
+            pump1VSD1.plcId,
+            pump1VSD1.values,
+            pump1VSD1.state,
+            transaction
+          );
+        }
+      }
+
+      if (this.accumulatedData.vsdPump2.length > 0) {
+        for (const pump2VSD of this.accumulatedData.vsdPump2) {
+          await upsertVsdPump2(
+            pump2VSD.plcId,
+            pump2VSD.values,
+            pump2VSD.state,
+            transaction
+          );
+        }
+      }
+
       await transaction.commit();
       this.resetAccumulatedData();
     } catch (error) {
@@ -98,13 +247,22 @@ class EventHandler {
   resetAccumulatedData() {
     this.accumulatedData = {
       stations: [],
-      pumpStates: [],
-      pumpLeads: [],
-      sensorConfs: [],
       setPoints: [],
       mappingDis: [],
       mappingDos: [],
       dataEnergies: [],
+      analogInputScale: [],
+      lowDischarge: [],
+      highDischarge: [],
+      lowLevel: [],
+      failurePhase: [],
+      failureVFD: [],
+      filterStation: [],
+      fertigation: [],
+      lakeLevel: [],
+      vsdPumpPM: [],
+      vsdPump1: [],
+      vsdPump2: [],
     };
   }
 
@@ -112,30 +270,7 @@ class EventHandler {
   async handleStation(data) {
     this.accumulatedData.stations.push({
       plcId: data.plcId,
-      station: data.values,
-      state: data.state,
-    });
-  }
-
-  async handlePumpPm(data) {
-    this.accumulatedData.pumpStates.push({
-      plcId: data.plcId,
-      pumpPm: data.values,
-    });
-  }
-
-  async handlePumpLead(data) {
-    this.accumulatedData.pumpLeads.push({
-      plcId: data.plcId,
-      pumpLead: data.values,
-      state: data.state,
-    });
-  }
-
-  async handleSensorConf(data) {
-    this.accumulatedData.sensorConfs.push({
-      plcId: data.plcId,
-      sensorConf: data.values,
+      values: data.values,
       state: data.state,
     });
   }
@@ -143,7 +278,7 @@ class EventHandler {
   async handleSetPoint(data) {
     this.accumulatedData.setPoints.push({
       plcId: data.plcId,
-      setPoint: data.values,
+      values: data.values,
       state: data.state,
     });
   }
@@ -167,11 +302,103 @@ class EventHandler {
   async handleDataEnergy(data) {
     this.accumulatedData.dataEnergies.push({
       plcId: data.plcId,
-      dataEnergy: data.values,
+      values: data.values,
       state: data.state,
     });
   }
 
+  async handleAnalogInputScale(data) {
+    this.accumulatedData.analogInputScale.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleLowDischarge(data) {
+    this.accumulatedData.lowDischarge.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleHighDischarge(data) {
+    this.accumulatedData.highDischarge.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleLowLevel(data) {
+    this.accumulatedData.lowLevel.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleFailurePhase(data) {
+    this.accumulatedData.failurePhase.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleFailureVFD(data) {
+    this.accumulatedData.failureVFD.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleFilterStation(data) {
+    this.accumulatedData.filterStation.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleFertigation(data) {
+    this.accumulatedData.fertigation.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleLakeLevel(data) {
+    this.accumulatedData.lakeLevel.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleVsdPumpPM(data) {
+    this.accumulatedData.vsdPumpPM.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleVsdPump1(data) {
+    this.accumulatedData.vsdPump1.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+
+  async handleVsdPump2(data) {
+    this.accumulatedData.vsdPump2.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
   // Añade métodos para los nuevos eventos aquí
 }
 
