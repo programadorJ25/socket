@@ -1,5 +1,4 @@
 const sequelize = require("../db/database");
-const PumpLead = require("../models/PumpLead");
 
 const upsertSetPoint = require("../models/SetPointService");
 const upsertMappingDi = require("../models/MappingDiService");
@@ -17,6 +16,12 @@ const upsertLakeLevel = require("../models/LakeLevelService");
 const upsertVsdPumpPM = require("../models/VsdPumpPMService");
 const upsertVsdPump1 = require("../models/VsdPump1Service");
 const upsertVsdPump2 = require("../models/VsdPump2Service");
+
+const upsertBombaPM = require("../models/bombaPMService");
+const upsertBombaLider = require("../models/BombaLideService");
+const upsertBombaAux = require("../models/BombaAuxService");
+const upsertAlarms = require("../models/AlarmsService");
+const upsertSintonizacion = require("../models/SintonizacionService");
 
 const Station = require("../models/Station");
 
@@ -41,6 +46,12 @@ class EventHandler {
       vsdPumpPM: [],
       vsdPump1: [],
       vsdPump2: [],
+      //mew data
+      bombaPM: [],
+      bombaLider: [],
+      bombaAux: [],
+      alarms: [],
+      sintonizacion: [],
     };
     this.handleStation = this.handleStation.bind(this);
     this.handleSetPoint = this.handleSetPoint.bind(this);
@@ -60,6 +71,11 @@ class EventHandler {
     this.handleVsdPump1 = this.handleVsdPump1.bind(this);
     this.handleVsdPump2 = this.handleVsdPump2.bind(this);
     // Bindear otros métodos según sea necesario
+    this.handleBombaPM = this.handleBombaPM.bind(this);
+    this.handleBombaLider = this.handleBombaLider.bind(this);
+    this.handleBombaAux = this.handleBombaAux.bind(this);
+    this.handleAlarms = this.handleAlarms.bind(this);
+    this.handleSintonizacion = this.handleSintonizacion.bind(this);
   }
   async batchInsertData() {
     const transaction = await sequelize.transaction();
@@ -240,6 +256,58 @@ class EventHandler {
         }
       }
 
+      //ultimos cinco datos
+      if (this.accumulatedData.bombaPM.length > 0) {
+        for (const bombaPM of this.accumulatedData.bombaPM) {
+          await upsertBombaPM(
+            bombaPM.plcId,
+            bombaPM.values,
+            bombaPM.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.bombaLider.length > 0) {
+        for (const bombaLider of this.accumulatedData.bombaLider) {
+          await upsertBombaLider(
+            bombaLider.plcId,
+            bombaLider.values,
+            bombaLider.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.bombaAux.length > 0) {
+        for (const bombaAux of this.accumulatedData.bombaAux) {
+          await upsertBombaAux(
+            bombaAux.plcId,
+            bombaAux.values,
+            bombaAux.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.alarms.length > 0) {
+        for (const alarms of this.accumulatedData.alarms) {
+          await upsertAlarms(
+            alarms.plcId,
+            alarms.values,
+            alarms.state,
+            transaction
+          );
+        }
+      }
+      if (this.accumulatedData.sintonizacion.length > 0) {
+        for (const sintonizacion of this.accumulatedData.sintonizacion) {
+          await upsertSintonizacion(
+            sintonizacion.plcId,
+            sintonizacion.values,
+            sintonizacion.state,
+            transaction
+          );
+        }
+      }
+
       await transaction.commit();
       this.resetAccumulatedData();
     } catch (error) {
@@ -267,6 +335,12 @@ class EventHandler {
       vsdPumpPM: [],
       vsdPump1: [],
       vsdPump2: [],
+      //mew data
+      bombaPM: [],
+      bombaLider: [],
+      bombaAux: [],
+      alarms: [],
+      sintonizacion: [],
     };
   }
 
@@ -405,6 +479,41 @@ class EventHandler {
     });
   }
   // Añade métodos para los nuevos eventos aquí
+  async handleBombaPM(data) {
+    this.accumulatedData.bombaPM.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleBombaLider(data) {
+    this.accumulatedData.bombaLider.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleBombaAux(data) {
+    this.accumulatedData.bombaAux.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleAlarms(data) {
+    this.accumulatedData.alarms.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
+  async handleSintonizacion(data) {
+    this.accumulatedData.sintonizacion.push({
+      plcId: data.plcId,
+      values: data.values,
+      state: data.state,
+    });
+  }
 }
 
 module.exports = { EventHandler }; // Exportar la clase como propiedad de un objeto

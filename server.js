@@ -61,6 +61,11 @@ io.on("connection", (socket) => {
     vsdPump1: eventHandler.handleVsdPump1,
     vsdPump2: eventHandler.handleVsdPump2,
     // Añadir nuevos eventos aquí
+    bombaPM: eventHandler.handleBombaPM,
+    bombaLider: eventHandler.handleBombaLider,
+    bombaAux: eventHandler.handleBombaAux,
+    alarms: eventHandler.handleAlarms,
+    sintonizacion: eventHandler.handleSintonizacion,
   };
 
   // Registrar eventos

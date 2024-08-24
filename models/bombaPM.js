@@ -1,15 +1,19 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const PumpLead = sequelize.define("pump_lead", {
+const BombaPM = sequelize.define("bombaPM", {
   plcId: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  pumpLead: {
+  bombaPM: {
     type: DataTypes.JSON,
     allowNull: false,
   },
+  state: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 
-module.exports = PumpLead;
+module.exports = BombaPM;

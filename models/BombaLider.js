@@ -1,15 +1,19 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/database");
 
-const DataEnergy = sequelize.define("energy", {
+const BombaLider = sequelize.define("bombaLider", {
   plcId: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  dataEnergy: {
+  bombaLider: {
     type: DataTypes.JSON,
     allowNull: false,
   },
+  state: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 
-module.exports = DataEnergy;
+module.exports = BombaLider;
