@@ -1,5 +1,6 @@
 const sequelize = require("../db/database");
 
+const upsertStation = require("../models/StationService");
 const upsertSetPoint = require("../models/SetPointService");
 const upsertMappingDi = require("../models/MappingDiService");
 const upsertMappingDo = require("../models/MappingDoService");
@@ -80,11 +81,22 @@ class EventHandler {
   async batchInsertData() {
     const transaction = await sequelize.transaction();
     try {
+      // if (this.accumulatedData.stations.length > 0) {
+      //   await Station.bulkCreate(this.accumulatedData.stations, {
+      //     transaction,
+      //   });
+      // }
+
       if (this.accumulatedData.stations.length > 0) {
-        await Station.bulkCreate(this.accumulatedData.stations, {
-          transaction,
-        });
+        for (const Station of this.accumulatedData.stations) {
+          await upsertStation(
+            Station.plcId,
+            Station.values,
+            transaction
+          );
+        }
       }
+
       if (this.accumulatedData.setPoints.length > 0) {
         for (const set_Point of this.accumulatedData.setPoints) {
           await upsertSetPoint(
@@ -346,11 +358,9 @@ class EventHandler {
 
   // Métodos para acumular datos
   async handleStation(data) {
-    console.log(data);
-
     this.accumulatedData.stations.push({
       plcId: data.plcId,
-      station: data.values,
+      values: data.values,
     });
   }
 

@@ -6,9 +6,9 @@ const Station = sequelize.define("station", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  station: {
+  values: {
     type: DataTypes.JSON,
-    allowNull: false,
+    allowNull: true,
   },
 });
 
