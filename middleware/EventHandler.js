@@ -18,7 +18,7 @@ const upsertVsdPumpPM = require("../models/VsdPumpPMService");
 const upsertVsdPump1 = require("../models/VsdPump1Service");
 const upsertVsdPump2 = require("../models/VsdPump2Service");
 
-const upsertBombaPM = require("../models/bombaPMService");
+const upsertBombaPM = require("../models/BombaPMService");
 const upsertBombaLider = require("../models/BombaLideService");
 const upsertBombaAux = require("../models/BombaAuxService");
 const upsertAlarms = require("../models/AlarmsService");
